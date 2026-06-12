@@ -7,10 +7,10 @@ import {
 import { resolveAccessToken } from "../../../lib/session";
 
 // Blackbird Pay, server-side: create a Payment Intent and immediately confirm
-// it for the signed-in member. Runs on the server because the merchant id and
-// the intent lifecycle belong on the backend; the browser only says "pay".
-// The member token comes from resolveAccessToken (ACCESS_TOKEN env var or the
-// OAuth session cookie) and needs the write:payment_intent scope.
+// it for the signed-in member. Runs on the server because the intent lifecycle
+// belongs on the backend; the browser only says "pay". The member token comes
+// from resolveAccessToken (ACCESS_TOKEN env var or the OAuth session cookie) and
+// needs the write:payment_intent scope.
 export async function POST(req: Request) {
   const accessToken = await resolveAccessToken();
   if (!accessToken) {
@@ -20,13 +20,11 @@ export async function POST(req: Request) {
     );
   }
 
+  // FLYNET_MERCHANT_ID is optional. Set it to collect into a specific merchant
+  // (e.g. from your onboarding email). Leave it unset to let the app pay itself:
+  // the member JWT already identifies the merchant, so no id is needed — the
+  // token alone is enough and the payment just works.
   const merchantId = process.env.FLYNET_MERCHANT_ID;
-  if (!merchantId) {
-    return NextResponse.json(
-      { error: "FLYNET_MERCHANT_ID is not set in .env.local." },
-      { status: 500 },
-    );
-  }
 
   let body: { amountFlyWei?: string; description?: string };
   try {
@@ -51,14 +49,17 @@ export async function POST(req: Request) {
 
   try {
     const intent = await member.createPaymentIntent({
-      flynetMerchantId: merchantId,
+      // Only send a merchant id when one is configured; omitting it makes the
+      // app pay itself off the JWT. (The SDK types still mark this required, so
+      // we omit the key rather than pass an empty string.)
+      ...(merchantId ? { flynetMerchantId: merchantId } : {}),
       customerUserId: userId,
       amount: { value: body.amountFlyWei, currency: "FLY" },
       description: body.description ?? "Flynet starter demo payment",
       // Demo: every click is a new order. In a real app, pass your order id so
       // retries dedupe onto the same intent instead of double-charging.
       idempotencyKey: crypto.randomUUID(),
-    });
+    } as Parameters<typeof member.createPaymentIntent>[0]);
 
     const paid = await member.confirmPaymentIntent({
       id: intent.id,
