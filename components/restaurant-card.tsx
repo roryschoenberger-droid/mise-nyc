@@ -15,13 +15,16 @@ function locationLine(locations: RestaurantLocation[]): string | null {
 
 // One restaurant from Flynet Discovery. Server-safe — render it straight from
 // the listRestaurants response. Pass `locations` (lib/locations.ts) to show
-// where it is and its booking link.
+// where it is and its booking link, and `checkInCount` (lib/check-ins.ts) to
+// show how many times members have checked in.
 export function RestaurantCard({
   restaurant,
   locations = [],
+  checkInCount = null,
 }: {
   restaurant: Restaurant;
   locations?: RestaurantLocation[];
+  checkInCount?: number | null;
 }) {
   const image =
     restaurant.asset?.web2x ??
@@ -73,6 +76,15 @@ export function RestaurantCard({
             </span>
           )}
         </div>
+        {typeof checkInCount === "number" && checkInCount > 0 && (
+          <div className="flex items-center gap-1.5 text-xs text-muted">
+            <PinIcon className="h-3.5 w-3.5 shrink-0 text-primary" />
+            <span>
+              {checkInCount.toLocaleString()}{" "}
+              {checkInCount === 1 ? "check-in" : "check-ins"}
+            </span>
+          </div>
+        )}
         {(where || link) && (
           <div className="flex items-baseline justify-between gap-3 text-sm">
             <span className="truncate text-muted">{where}</span>
@@ -90,5 +102,24 @@ export function RestaurantCard({
         )}
       </div>
     </article>
+  );
+}
+
+// Map-pin glyph for the check-in stat.
+function PinIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+      <circle cx="12" cy="10" r="3" />
+    </svg>
   );
 }

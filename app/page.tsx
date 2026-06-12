@@ -6,6 +6,7 @@ import { LoginButton, LogoutButton, RestaurantCard } from "../components";
 import { OpenDevSetupButton } from "../components/dev-drawer";
 import { ACCESS_COOKIE } from "../lib/auth";
 import { listRestaurantLocations } from "../lib/locations";
+import { getRestaurantCheckInCount } from "../lib/check-ins";
 import { env } from "../lib/env";
 import { MemberPanel } from "./member-panel";
 
@@ -79,14 +80,22 @@ async function renderRestaurants(apiKey: string | undefined): Promise<ReactNode>
     const restaurants = listed.restaurants
       .filter((restaurant) => restaurant.name)
       .slice(0, 8);
-    // Locations are a separate Discovery resource — fetch them in parallel,
-    // one call per listed restaurant (raw fetch, see lib/locations.ts). A
-    // failed lookup just hides the location line on that card.
-    const locations = await Promise.all(
-      restaurants.map((restaurant) =>
-        listRestaurantLocations(apiKey, restaurant.id).catch(() => []),
+    // Locations and check-in counts are separate Discovery resources — fetch
+    // both in parallel, one call per listed restaurant (raw fetch; see
+    // lib/locations.ts and lib/check-ins.ts). A failed lookup just drops that
+    // bit of the card (the location line, or the check-in stat).
+    const [locations, checkInCounts] = await Promise.all([
+      Promise.all(
+        restaurants.map((restaurant) =>
+          listRestaurantLocations(apiKey, restaurant.id).catch(() => []),
+        ),
       ),
-    );
+      Promise.all(
+        restaurants.map((restaurant) =>
+          getRestaurantCheckInCount(apiKey, restaurant.id),
+        ),
+      ),
+    ]);
     return (
       <Section title="Restaurants">
         <div className="grid gap-4 sm:grid-cols-2">
@@ -95,6 +104,7 @@ async function renderRestaurants(apiKey: string | undefined): Promise<ReactNode>
               key={restaurant.id}
               restaurant={restaurant}
               locations={locations[i]}
+              checkInCount={checkInCounts[i]}
             />
           ))}
         </div>
