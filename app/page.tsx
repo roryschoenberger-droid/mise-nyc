@@ -1,14 +1,15 @@
 import type { ReactNode } from "react";
 import { cookies } from "next/headers";
-import { FlynetDiscoveryClient, FlynetError } from "@flynetdev/core";
-import type { Restaurant } from "@flynetdev/react";
-import { LoginButton, LogoutButton, RestaurantCard } from "../components";
+import { LoginButton, LogoutButton } from "../components";
 import { OpenDevSetupButton } from "../components/dev-drawer";
 import { ACCESS_COOKIE } from "../lib/auth";
-import { listRestaurantLocations } from "../lib/locations";
-import { getRestaurantCheckInCount } from "../lib/check-ins";
 import { env } from "../lib/env";
+import { getLeaderboardData } from "../lib/leaderboard-data";
+import type { RankedRestaurant } from "../lib/leaderboard-data";
+import { MakeYourOwnCollab } from "./collabs/make-your-own";
+import { OnboardingBanner } from "./components/onboarding-banner";
 import { MemberPanel } from "./member-panel";
+import { CollabsView } from "./leaderboard/collabs-view";
 
 // The whole starter in one screen:
 //   1. Read restaurants from Flynet Discovery (server-side, with your API key).
@@ -28,21 +29,56 @@ export default async function Home({
   const accessToken = env.ACCESS_TOKEN || cookieToken;
   const signedInViaOAuth = !env.ACCESS_TOKEN && Boolean(cookieToken);
 
+  const { collabs: allCollabs, restaurants } = apiKey
+    ? await getLeaderboardData(apiKey)
+    : { collabs: [], restaurants: [] };
+  const topCollabs = allCollabs.slice(0, 5);
+
   return (
     <main className="mx-auto max-w-2xl space-y-10 p-10">
+      <OnboardingBanner />
       <header>
-        <p className="text-xs uppercase tracking-[0.2em] text-primary">
-          Flynet Starter
-        </p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-          Build on Blackbird
+        <h1 className="mt-2 flex items-center gap-3 text-3xl font-semibold tracking-tight">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/hummingbird.webp" alt="" aria-hidden className="h-12 w-12 shrink-0" style={{ filter: "invert(0.92)" }} />
+          Mise
         </h1>
         <p className="mt-2 text-muted">
-          Real restaurant data from the Flynet API, rendered with the SDK.
+          Everything in its right place. Where restaurants find their people — and their next great collab.
         </p>
+        <a href="/claim" className="mt-4 inline-block text-sm font-semibold text-primary hover:opacity-80">
+          Claim your spot →
+        </a>
       </header>
 
-      {await renderRestaurants(apiKey)}
+
+      {topCollabs.length > 0 && (
+        <section className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xs uppercase tracking-[0.16em] text-muted">✦ Top Collabs</h2>
+            <a href="/collabs" className="text-xs text-primary hover:opacity-80">
+              See all →
+            </a>
+          </div>
+          <CollabsView pairs={topCollabs} />
+        </section>
+      )}
+
+      {restaurants.length > 0 && (
+        <MakeYourOwnCollab restaurants={restaurants} />
+      )}
+
+      {apiKey && (
+        <section className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xs uppercase tracking-[0.16em] text-muted">🏆 NYC Blackbird Restaurants Leaderboard</h2>
+            <a href="/leaderboard" className="text-xs text-primary hover:opacity-80">
+              See all →
+            </a>
+          </div>
+          <LeaderboardPreview apiKey={apiKey} />
+        </section>
+      )}
 
       {authError ? <AuthErrorNotice error={authError} /> : null}
 
@@ -63,66 +99,6 @@ export default async function Home({
   );
 }
 
-async function renderRestaurants(apiKey: string | undefined): Promise<ReactNode> {
-  if (!apiKey) return <SetupNotice />;
-  try {
-    // API_BASE_URL switches environments; unset means production.
-    const discovery = new FlynetDiscoveryClient({
-      apiKey,
-      serverURL: env.API_BASE_URL,
-    });
-    // The list includes unpublished records with blank names (production has
-    // many, and blank names sort first) — over-fetch and keep the first 8
-    // that are actually presentable.
-    const listed = await discovery.restaurants.listRestaurants({
-      pageSize: 50,
-    });
-    const restaurants = listed.restaurants
-      .filter((restaurant) => restaurant.name)
-      .slice(0, 8);
-    // Locations and check-in counts are separate Discovery resources — fetch
-    // both in parallel, one call per listed restaurant (raw fetch; see
-    // lib/locations.ts and lib/check-ins.ts). A failed lookup just drops that
-    // bit of the card (the location line, or the check-in stat).
-    const [locations, checkInCounts] = await Promise.all([
-      Promise.all(
-        restaurants.map((restaurant) =>
-          listRestaurantLocations(apiKey, restaurant.id).catch(() => []),
-        ),
-      ),
-      Promise.all(
-        restaurants.map((restaurant) =>
-          getRestaurantCheckInCount(apiKey, restaurant.id).catch(() => null),
-        ),
-      ),
-    ]);
-    return (
-      <Section title="Restaurants">
-        <div className="grid gap-4 sm:grid-cols-2">
-          {(restaurants as Restaurant[]).map((restaurant, i) => (
-            <RestaurantCard
-              key={restaurant.id}
-              restaurant={restaurant}
-              locations={locations[i]}
-              checkInCount={checkInCounts[i]}
-            />
-          ))}
-        </div>
-      </Section>
-    );
-  } catch (error) {
-    const message =
-      error instanceof FlynetError
-        ? `${error.kind}: ${error.message}`
-        : "Unexpected error.";
-    return (
-      <Notice tone="error" title="Couldn't load restaurants">
-        {message} Check that <Code>FLYNET_API_KEY</Code> in <Code>.env.local</Code> is a
-        valid Flynet key.
-      </Notice>
-    );
-  }
-}
 
 function SetupNotice() {
   // The Dev Setup drawer only exists in dev builds (see layout.tsx). In dev,
@@ -189,16 +165,6 @@ function AuthErrorNotice({ error }: { error: string }) {
   );
 }
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section className="space-y-3">
-      <h2 className="text-xs uppercase tracking-[0.16em] text-muted">
-        {title}
-      </h2>
-      {children}
-    </section>
-  );
-}
 
 function Notice({
   title,
@@ -228,5 +194,36 @@ function Code({ children }: { children: ReactNode }) {
     <code className="rounded bg-white/10 px-1 py-0.5 text-foreground">
       {children}
     </code>
+  );
+}
+
+async function LeaderboardPreview({ apiKey }: { apiKey: string }) {
+  const { fsr } = await getLeaderboardData(apiKey);
+  const top5 = fsr.slice(0, 5);
+  return (
+    <ol className="space-y-2">
+      {top5.map(({ restaurant, checkInCount, rank }: RankedRestaurant) => {
+        const image =
+          restaurant.asset?.web_2x ??
+          restaurant.asset?.full_3x ??
+          restaurant.asset?.preview_1x ??
+          null;
+        return (
+          <li key={restaurant.id} className="flex items-center gap-3 rounded-2xl bg-surface-low p-3">
+            <span className="w-6 shrink-0 text-center text-sm font-semibold text-muted">{rank}</span>
+            {image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={image} alt={restaurant.name} className="h-10 w-10 shrink-0 rounded-lg object-cover" />
+            ) : (
+              <div className="h-10 w-10 shrink-0 rounded-lg bg-white/10" />
+            )}
+            <p className="min-w-0 flex-1 truncate text-sm font-medium">{restaurant.name}</p>
+            <span className="shrink-0 text-sm tabular-nums text-muted">
+              {checkInCount > 0 ? checkInCount.toLocaleString() : "—"}
+            </span>
+          </li>
+        );
+      })}
+    </ol>
   );
 }

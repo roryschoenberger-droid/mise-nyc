@@ -10,10 +10,10 @@
    (bg-primary/15 → rgb(117 91 255 / 0.15)). Use rgb(var(--token)) in raw CSS. */
 :root {
   /* Core brand */
-  --core-primary: 117 91 255; /* #755bff */
-  --core-primary-dim: 91 60 232; /* #5b3ce8 */
-  --core-primary-bright: 200 191 255; /* #c8bfff */
-  --core-on-primary: 0 0 0;
+  --core-primary: 255 182 213; /* #ffb6d5 — baby pink */
+  --core-primary-dim: 240 148 190; /* #f094be */
+  --core-primary-bright: 255 220 238; /* #ffdcee */
+  --core-on-primary: 30 10 20;
 
   /* Semantic */
   --success: 44 225 152; /* #2ce198 */
