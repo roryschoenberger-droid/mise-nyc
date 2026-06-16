@@ -103,6 +103,7 @@ export async function getLeaderboardData(apiKey: string): Promise<{
   fsr: RankedRestaurant[];
   qsr: RankedRestaurant[];
   collabs: CollabPair[];
+  restaurants: CollabRestaurant[];
 }> {
   const restaurantRecord = await fetchNycRestaurants(apiKey);
   const restaurantIds = Object.keys(restaurantRecord);
