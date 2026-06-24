@@ -25,9 +25,11 @@ export default async function MyChallengesPage() {
     await getSessionContext();
   if (!accessToken) redirect("/");
 
-  const myChallenges = restaurantId ? getRestaurantChallenges(restaurantId) : [];
+  const myChallenges = restaurantId
+    ? await getRestaurantChallenges(restaurantId)
+    : [];
   const joinedMarketChallenges = restaurantId
-    ? getJoinedMarketChallenges(restaurantId)
+    ? await getJoinedMarketChallenges(restaurantId)
     : [];
 
   // Fetch the restaurant's check-in times once, count per DINES challenge.

@@ -56,7 +56,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const challenge = getChallengeById(body.challengeId);
+  const challenge = await getChallengeById(body.challengeId);
   if (!challenge || challenge.source !== "blackbird") {
     return NextResponse.json(
       { error: "Market challenge not found." },
@@ -151,7 +151,7 @@ export async function POST(req: Request) {
     };
 
     // Only record the join after the payment confirms.
-    addJoinToChallenge(challenge.id, restaurantId);
+    await addJoinToChallenge(challenge.id, restaurantId);
 
     return NextResponse.json({
       joined: true,

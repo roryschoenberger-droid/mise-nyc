@@ -29,6 +29,11 @@ export const env = createEnv({
     // Optional pinned member access token (JWT) — set to skip the sign-in flow.
     ACCESS_TOKEN: z.string().min(1).optional(),
 
+    // Turso (libSQL) database. When both are set, storage reads/writes the
+    // database instead of the local data/*.json files. Set together.
+    TURSO_DATABASE_URL: z.string().min(1).optional(),
+    TURSO_AUTH_TOKEN: z.string().min(1).optional(),
+
     // Browser-facing redirect target for the OAuth flow. Must be a full URL and
     // exactly match a redirect URI registered for the OAuth app. Optional —
     // lib/auth.ts blocks sign-in (and falls back to localhost) when it's unset.
@@ -68,6 +73,8 @@ export const env = createEnv({
     FLYNET_CLIENT_SECRET: process.env.FLYNET_CLIENT_SECRET,
     FLYNET_MERCHANT_ID: process.env.FLYNET_MERCHANT_ID,
     ACCESS_TOKEN: process.env.ACCESS_TOKEN,
+    TURSO_DATABASE_URL: process.env.TURSO_DATABASE_URL,
+    TURSO_AUTH_TOKEN: process.env.TURSO_AUTH_TOKEN,
     REDIRECT_URI: process.env.REDIRECT_URI,
     API_BASE_URL: process.env.API_BASE_URL,
     AUTH_BASE_URL: process.env.AUTH_BASE_URL,

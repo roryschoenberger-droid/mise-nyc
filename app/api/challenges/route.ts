@@ -67,7 +67,7 @@ export async function POST(req: Request) {
   // Stable owner id from the member token (decoded locally, no API call).
   const restaurantId = getAuthenticatedUserId(accessToken);
 
-  const challenge = appendRestaurantChallenge({
+  const challenge = await appendRestaurantChallenge({
     title: data.title,
     description: data.description,
     type: data.type,

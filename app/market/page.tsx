@@ -14,7 +14,7 @@ export default async function MarketPage() {
     await getSessionContext();
   if (!accessToken) redirect("/");
 
-  const marketChallenges = getMarketChallenges();
+  const marketChallenges = await getMarketChallenges();
 
   return (
     <AppShell signedInViaOAuth={signedInViaOAuth}>

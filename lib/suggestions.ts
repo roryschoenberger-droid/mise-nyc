@@ -1,12 +1,7 @@
-import fs from "fs";
-import path from "path";
+import { ensureSchema, getDb } from "./db";
 
-// Restaurant-owner suggestions for market-wide challenges Blackbird could run.
-// Stored locally (data/suggestions.json) for now — same mock pattern as
-// challenges. Blackbird staff read them at /admin/suggestions. Swap the file
-// read/write for the real database alongside the rest of the storage layer.
-
-const FILE = path.join(process.cwd(), "data", "suggestions.json");
+// Restaurant-owner suggestions for market-wide challenges, stored in the Turso
+// database (table `suggestions`). Blackbird staff read them at /admin/suggestions.
 
 export interface ChallengeSuggestion {
   id: string;
@@ -18,32 +13,29 @@ export interface ChallengeSuggestion {
   createdAt: string;
 }
 
-function readSuggestions(): ChallengeSuggestion[] {
-  try {
-    const raw = fs.readFileSync(FILE, "utf-8");
-    const parsed = JSON.parse(raw) as unknown;
-    return Array.isArray(parsed) ? (parsed as ChallengeSuggestion[]) : [];
-  } catch {
-    return [];
-  }
-}
-
-function writeSuggestions(items: ChallengeSuggestion[]): void {
-  fs.writeFileSync(FILE, JSON.stringify(items, null, 2));
-}
-
 // All suggestions, newest first — for the Blackbird staff view.
-export function getSuggestions(): ChallengeSuggestion[] {
-  return readSuggestions().slice().reverse();
+export async function getSuggestions(): Promise<ChallengeSuggestion[]> {
+  await ensureSchema();
+  const res = await getDb().execute(
+    "SELECT * FROM suggestions ORDER BY created_at DESC",
+  );
+  return res.rows.map((r) => ({
+    id: r.id as string,
+    restaurantId: r.restaurant_id as string,
+    market: r.market as string,
+    text: r.text as string,
+    createdAt: r.created_at as string,
+  }));
 }
 
-// Append a new suggestion (safe read-modify-write). Returns the stored record.
-export function appendSuggestion(input: {
+// Append a new suggestion. Returns the stored record.
+export async function appendSuggestion(input: {
   restaurantId: string;
   market: string;
   text: string;
   createdAt: string;
-}): ChallengeSuggestion {
+}): Promise<ChallengeSuggestion> {
+  await ensureSchema();
   const suggestion: ChallengeSuggestion = {
     id: `suggestion-${crypto.randomUUID()}`,
     restaurantId: input.restaurantId,
@@ -51,8 +43,15 @@ export function appendSuggestion(input: {
     text: input.text,
     createdAt: input.createdAt,
   };
-  const all = readSuggestions();
-  all.push(suggestion);
-  writeSuggestions(all);
+  await getDb().execute({
+    sql: "INSERT INTO suggestions (id, restaurant_id, market, text, created_at) VALUES (?, ?, ?, ?, ?)",
+    args: [
+      suggestion.id,
+      suggestion.restaurantId,
+      suggestion.market,
+      suggestion.text,
+      suggestion.createdAt,
+    ],
+  });
   return suggestion;
 }

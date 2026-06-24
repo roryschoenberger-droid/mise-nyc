@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { createClient } from "@libsql/client";
 import { blockInProduction } from "../../../../lib/dev-only";
 import { env } from "../../../../lib/env";
 
@@ -18,15 +19,18 @@ const FIELDS = [
   "FLYNET_CLIENT_ID",
   "FLYNET_CLIENT_SECRET",
   "REDIRECT_URI",
+  "TURSO_DATABASE_URL",
+  "TURSO_AUTH_TOKEN",
 ] as const;
 type Field = (typeof FIELDS)[number];
 
-// Which fields are secrets. Secrets are masked in the status preview; the
-// redirect URI is just a URL, so we show it in full to make it easy to confirm.
+// Which fields are secrets. Secrets are masked in the status preview; URLs are
+// shown in full to make them easy to confirm.
 const SECRET_FIELDS = new Set<Field>([
   "FLYNET_API_KEY",
   "FLYNET_CLIENT_ID",
   "FLYNET_CLIENT_SECRET",
+  "TURSO_AUTH_TOKEN",
 ]);
 
 // Environment routing comes from the validated env (unset = production), the
@@ -115,6 +119,21 @@ async function validateOAuthClient(
     return null;
   } catch {
     return "Couldn't reach the OAuth server to verify the client credentials.";
+  }
+}
+
+// Verify the Turso credentials by actually connecting and running a trivial
+// query. Confirms the URL + token work before we persist them.
+async function validateTurso(
+  url: string,
+  token: string,
+): Promise<string | null> {
+  try {
+    const client = createClient({ url, authToken: token });
+    await client.execute("select 1");
+    return null;
+  } catch {
+    return "Couldn't connect to Turso with this database URL + auth token.";
   }
 }
 
@@ -219,6 +238,22 @@ export async function POST(req: Request) {
   if (updates.REDIRECT_URI) {
     const err = validateRedirectUri(updates.REDIRECT_URI);
     if (err) fieldErrors.REDIRECT_URI = err;
+  }
+
+  // Turso URL + token are a pair — verify the connection whenever either changes.
+  if (updates.TURSO_DATABASE_URL || updates.TURSO_AUTH_TOKEN) {
+    const url = effective("TURSO_DATABASE_URL");
+    const token = effective("TURSO_AUTH_TOKEN");
+    if (!url || !token) {
+      const missing: Field = !url ? "TURSO_DATABASE_URL" : "TURSO_AUTH_TOKEN";
+      fieldErrors[missing] = "Set both the database URL and auth token to verify them.";
+    } else {
+      const err = await validateTurso(url, token);
+      if (err) {
+        if (updates.TURSO_DATABASE_URL) fieldErrors.TURSO_DATABASE_URL = err;
+        if (updates.TURSO_AUTH_TOKEN) fieldErrors.TURSO_AUTH_TOKEN = err;
+      }
+    }
   }
 
   if (Object.keys(fieldErrors).length > 0) {

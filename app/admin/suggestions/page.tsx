@@ -19,8 +19,8 @@ function formatDate(iso: string): string {
   });
 }
 
-export default function SuggestionsAdminPage() {
-  const suggestions = getSuggestions();
+export default async function SuggestionsAdminPage() {
+  const suggestions = await getSuggestions();
 
   return (
     <main className="mx-auto max-w-3xl space-y-6 p-6 sm:p-10">

@@ -27,7 +27,9 @@ type CredField =
   | "FLYNET_API_KEY"
   | "FLYNET_CLIENT_ID"
   | "FLYNET_CLIENT_SECRET"
-  | "REDIRECT_URI";
+  | "REDIRECT_URI"
+  | "TURSO_DATABASE_URL"
+  | "TURSO_AUTH_TOKEN";
 
 const CREDENTIALS: {
   name: CredField;
@@ -62,6 +64,19 @@ const CREDENTIALS: {
     help: "Your ngrok (or deployed) https URL + /callback. Whitelist it at bb-apis.vercel.app/redirect (sign in with your Slack email).",
     secret: false,
     placeholder: "https://<subdomain>.ngrok.app/callback",
+  },
+  {
+    name: "TURSO_DATABASE_URL",
+    label: "Turso database URL",
+    help: "From your Turso dashboard. Starts with libsql://. Verified on save.",
+    secret: false,
+    placeholder: "libsql://your-db.turso.io",
+  },
+  {
+    name: "TURSO_AUTH_TOKEN",
+    label: "Turso auth token",
+    help: "The token you generated in Turso. Secret — stays server-side.",
+    secret: true,
   },
 ];
 

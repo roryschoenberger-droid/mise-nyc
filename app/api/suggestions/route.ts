@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const suggestion = appendSuggestion({
+  const suggestion = await appendSuggestion({
     restaurantId,
     market: getRestaurantMarket(restaurantId),
     text: parsed.data.text,
