@@ -2,6 +2,8 @@ export { BirdMark } from "./bird-mark";
 export { Tag, type TagTone } from "./tag";
 export { RestaurantCard } from "./restaurant-card";
 export { MarketChallengeCard } from "./market-challenge-card";
+export { MyChallengeCard } from "./my-challenge-card";
+export { NewChallengeButton } from "./new-challenge-button";
 export { UserCard } from "./user-card";
 export { BBPayButton } from "./bb-pay-button";
 export { LoginButton } from "./login-button";

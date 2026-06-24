@@ -1,14 +1,20 @@
 import type { ReactNode } from "react";
 import { cookies } from "next/headers";
+import { getAuthenticatedUserId } from "@flynetdev/core";
 import {
   BirdMark,
   LoginButton,
   LogoutButton,
   MarketChallengeCard,
+  MyChallengeCard,
+  NewChallengeButton,
 } from "../components";
 import { ACCESS_COOKIE } from "../lib/auth";
 import { env } from "../lib/env";
-import { getMarketChallenges } from "../lib/market-challenges";
+import {
+  getMarketChallenges,
+  getRestaurantChallenges,
+} from "../lib/market-challenges";
 
 // Challenge Hub — the restaurant-facing dashboard.
 //   • Unauthenticated visitors get a full-screen sign-in card.
@@ -33,6 +39,10 @@ export default async function Home({
   }
 
   const marketChallenges = getMarketChallenges();
+  // Same owner id the create route stamps onto a challenge, so a manager sees
+  // exactly their own. Decoded locally from the token — no Flynet call.
+  const restaurantId = getAuthenticatedUserId(accessToken);
+  const myChallenges = getRestaurantChallenges(restaurantId);
 
   return (
     <main className="mx-auto max-w-4xl space-y-10 p-6 sm:p-10">
@@ -54,7 +64,16 @@ export default async function Home({
       <ChallengeSection
         title="My Challenges"
         emptyMessage="No challenges yet — your restaurant's challenges will show up here."
-      />
+        action={<NewChallengeButton />}
+      >
+        {myChallenges.length > 0 ? (
+          <div className="grid gap-4 sm:grid-cols-2">
+            {myChallenges.map((challenge) => (
+              <MyChallengeCard key={challenge.id} challenge={challenge} />
+            ))}
+          </div>
+        ) : null}
+      </ChallengeSection>
 
       <ChallengeSection
         title="Market Challenges"
@@ -77,15 +96,20 @@ export default async function Home({
 function ChallengeSection({
   title,
   emptyMessage,
+  action,
   children,
 }: {
   title: string;
   emptyMessage: string;
+  action?: ReactNode;
   children?: ReactNode;
 }) {
   return (
     <section className="space-y-3">
-      <h2 className="text-xs uppercase tracking-[0.16em] text-muted">{title}</h2>
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-xs uppercase tracking-[0.16em] text-muted">{title}</h2>
+        {action}
+      </div>
       {children ?? (
         <div className="rounded-2xl border border-white/10 bg-surface-low p-8 text-center">
           <p className="text-sm text-muted">{emptyMessage}</p>

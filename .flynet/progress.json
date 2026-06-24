@@ -1,7 +1,7 @@
 {
   "feature": "challenge-hub",
   "createdAt": "2026-06-24T15:34:01.325Z",
-  "updatedAt": "2026-06-24T15:37:20.042Z",
+  "updatedAt": "2026-06-24T15:40:09.069Z",
   "tasks": [
     {
       "id": "01",
@@ -17,21 +17,21 @@
       "id": "02",
       "title": "Market challenges list",
       "issue": ".scratch/challenge-hub/issues/02-market-challenges-list.md",
-      "status": "in_progress",
+      "status": "done",
       "agent": "slice-02",
-      "commit": null,
+      "commit": "bd1dc6213bee2a862f6a50ec4b629dc427ef50da",
       "note": null,
-      "updatedAt": "2026-06-24T15:37:20.041Z"
+      "updatedAt": "2026-06-24T15:39:09.221Z"
     },
     {
       "id": "03",
       "title": "Create and view my challenges",
       "issue": ".scratch/challenge-hub/issues/03-create-view-my-challenges.md",
-      "status": "pending",
-      "agent": null,
+      "status": "in_progress",
+      "agent": "slice-03",
       "commit": null,
       "note": null,
-      "updatedAt": "2026-06-24T15:34:01.327Z"
+      "updatedAt": "2026-06-24T15:40:09.069Z"
     },
     {
       "id": "04",
