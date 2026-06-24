@@ -47,11 +47,21 @@ export default async function Home({
   const marketChallenges = getMarketChallenges();
   // Same owner id the create route stamps onto a challenge, so a manager sees
   // exactly their own. Decoded locally from the token — no Flynet call.
-  const restaurantId = getAuthenticatedUserId(accessToken);
-  const myChallenges = getRestaurantChallenges(restaurantId);
+  // getAuthenticatedUserId THROWS if the token isn't a decodable member JWT
+  // (e.g. an API key pasted as ACCESS_TOKEN, or an expired/opaque value), so we
+  // guard it: a bad token must degrade gracefully, never 500 the dashboard.
+  let restaurantId: string | null = null;
+  try {
+    restaurantId = getAuthenticatedUserId(accessToken);
+  } catch {
+    restaurantId = null;
+  }
+  const myChallenges = restaurantId ? getRestaurantChallenges(restaurantId) : [];
   // Market challenges this manager has joined — shown in "My Challenges" too,
   // tagged "Market" to set them apart from the restaurant's own challenges.
-  const joinedMarketChallenges = getJoinedMarketChallenges(restaurantId);
+  const joinedMarketChallenges = restaurantId
+    ? getJoinedMarketChallenges(restaurantId)
+    : [];
 
   // Check-in progress for DINES challenges. Fetch the restaurant's check-in
   // timestamps ONCE (read-only Discovery call) and count per-challenge in
@@ -59,9 +69,10 @@ export default async function Home({
   // determined (no API key, or the feed errored); the card then renders "—".
   // The Promise.resolve(null) branch keeps the page rendering when the key is
   // unset rather than fetching with an empty key.
-  const checkInTimes = env.FLYNET_API_KEY
-    ? await getRestaurantCheckInTimes(env.FLYNET_API_KEY, restaurantId)
-    : null;
+  const checkInTimes =
+    restaurantId && env.FLYNET_API_KEY
+      ? await getRestaurantCheckInTimes(env.FLYNET_API_KEY, restaurantId)
+      : null;
   const progressFor = (challenge: Challenge): number | null | undefined =>
     challenge.type === "DINES"
       ? countCheckInsInWindow(
@@ -88,10 +99,20 @@ export default async function Home({
         {signedInViaOAuth ? <LogoutButton href="/api/auth/logout" /> : null}
       </header>
 
+      {restaurantId ? null : (
+        <Notice tone="error" title="We couldn't read your Blackbird account">
+          Your current session token isn&apos;t a Blackbird member login, so
+          creating and tracking your own challenges is paused. Sign in with
+          Blackbird (the <strong>Sign in</strong> flow) to get a member token —
+          then this section fills in. You can still browse Market Challenges
+          below.
+        </Notice>
+      )}
+
       <ChallengeSection
         title="My Challenges"
         emptyMessage="No challenges yet — your restaurant's challenges will show up here."
-        action={<NewChallengeButton />}
+        action={restaurantId ? <NewChallengeButton /> : null}
       >
         {myChallenges.length > 0 || joinedMarketChallenges.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2">
@@ -124,7 +145,7 @@ export default async function Home({
               <MarketChallengeCard
                 key={challenge.id}
                 challenge={challenge}
-                restaurantId={restaurantId}
+                restaurantId={restaurantId ?? ""}
               />
             ))}
           </div>

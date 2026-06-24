@@ -1,7 +1,7 @@
 {
   "feature": "challenge-hub",
   "createdAt": "2026-06-24T15:34:01.325Z",
-  "updatedAt": "2026-06-24T15:49:26.598Z",
+  "updatedAt": "2026-06-24T15:51:25.241Z",
   "tasks": [
     {
       "id": "01",
@@ -47,11 +47,11 @@
       "id": "05",
       "title": "Check-in progress tracker",
       "issue": ".scratch/challenge-hub/issues/05-checkin-progress-tracker.md",
-      "status": "in_progress",
+      "status": "done",
       "agent": "slice-05",
-      "commit": null,
+      "commit": "ec5a2375de6fe920a140aa7263bc823e2a1391ae",
       "note": null,
-      "updatedAt": "2026-06-24T15:49:26.597Z"
+      "updatedAt": "2026-06-24T15:51:25.240Z"
     },
     {
       "id": "06",

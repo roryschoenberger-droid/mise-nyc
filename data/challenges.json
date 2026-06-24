@@ -6,13 +6,20 @@
     "type": "DINES",
     "title": "🏆 World Cup Sports Bar Crawl",
     "description": "Check in at 5+ sports bars during World Cup matches.",
-    "threshold": { "count": 5 },
-    "fly_reward": { "value": "500000000000000000000", "currency": "FLY" },
+    "threshold": {
+      "count": 5
+    },
+    "fly_reward": {
+      "value": "500000000000000000000",
+      "currency": "FLY"
+    },
     "join_fee_fly_wei": "25000000000000000000",
     "start_time": "2026-06-11T00:00:00.000Z",
     "end_time": "2026-07-19T23:59:59.000Z",
     "terms": "Reward paid in $FLY after 5 verified check-ins at participating sports bars during World Cup match windows. One reward per restaurant.",
-    "joinedBy": []
+    "joinedBy": [
+      "8c11d183-22f9-4688-9a99-dc8f70f87d23"
+    ]
   },
   {
     "id": "blackbird-ice-cream-crawl",
@@ -21,12 +28,38 @@
     "type": "DINES",
     "title": "🍦 Ice Cream Crawl",
     "description": "Check in at 3 different ice cream spots and get at least a scoop within 24 hours.",
-    "threshold": { "count": 3 },
-    "fly_reward": { "value": "100000000000000000000", "currency": "FLY" },
+    "threshold": {
+      "count": 3
+    },
+    "fly_reward": {
+      "value": "100000000000000000000",
+      "currency": "FLY"
+    },
     "join_fee_fly_wei": "10000000000000000000",
     "start_time": "2026-07-01T00:00:00.000Z",
     "end_time": "2026-07-02T00:00:00.000Z",
     "terms": "Reward paid in $FLY after 3 verified check-ins at distinct ice cream spots within a single 24-hour window. One reward per restaurant.",
     "joinedBy": []
+  },
+  {
+    "id": "restaurant-5aa2beec-d5c7-44b1-b68b-f821122ef557",
+    "object": "challenge",
+    "source": "restaurant",
+    "type": "DINES",
+    "title": "Dine 3 Tuesdays",
+    "description": "Check in 3 Tuesdays this month and spend at least $20 to earn $5,000 FLY.",
+    "threshold": {
+      "count": 1
+    },
+    "fly_reward": {
+      "value": "5000000000000000000000",
+      "currency": "FLY"
+    },
+    "join_fee_fly_wei": "0",
+    "start_time": "2026-07-01T00:00:00.000Z",
+    "end_time": "2026-07-31T00:00:00.000Z",
+    "terms": "",
+    "joinedBy": [],
+    "restaurantId": "8c11d183-22f9-4688-9a99-dc8f70f87d23"
   }
 ]

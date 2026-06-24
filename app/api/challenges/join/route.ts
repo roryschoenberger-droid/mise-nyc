@@ -1,9 +1,5 @@
 import { NextResponse } from "next/server";
-import {
-  FlynetError,
-  FlynetMemberClient,
-  getAuthenticatedUserId,
-} from "@flynetdev/core";
+import { getAuthenticatedUserId } from "@flynetdev/core";
 import { resolveAccessToken } from "../../../../lib/session";
 import { env } from "../../../../lib/env";
 import {
@@ -12,12 +8,31 @@ import {
 } from "../../../../lib/market-challenges";
 
 // Join a market challenge by paying its $FLY join fee. Server-side, because the
-// Payment Intent lifecycle belongs on the backend (same approach as
-// /api/pay) — the browser only says "join", on a deliberate user click.
+// Payment Intent lifecycle belongs on the backend — the browser only says
+// "join", on a deliberate user click. No polling.
 //
-// Flow: look up the challenge's join_fee_fly_wei, create + confirm a Payment
-// Intent for that amount, and only on success record the join by adding the
-// manager's restaurantId to the challenge's joinedBy array. No polling.
+// Why direct REST instead of the SDK: @flynetdev/core's createPaymentIntent
+// validation marks `flynetMerchantId` as required and rejects the call before
+// it ever hits the network when no merchant id is set ("Input validation
+// failed … flynetMerchantId"). Per CLAUDE.md, when the SDK type lags the API we
+// call the Blackbird REST API directly with the member token. The merchant id
+// is sent only when configured; otherwise it's omitted (the member JWT
+// identifies the payer).
+
+// The Blackbird edge sits behind a WAF that 403s non-browser User-Agents (same
+// reason lib/check-ins.ts sets one), so send a browser-like UA.
+const BROWSER_UA =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 " +
+  "(KHTML, like Gecko) Chrome/124.0 Safari/537.36";
+
+async function readJson(res: Response): Promise<unknown> {
+  try {
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
 export async function POST(req: Request) {
   const accessToken = await resolveAccessToken();
   if (!accessToken) {
@@ -66,27 +81,60 @@ export async function POST(req: Request) {
     );
   }
 
-  // FLYNET_MERCHANT_ID is optional; unset means the app pays itself off the JWT.
-  const merchantId = env.FLYNET_MERCHANT_ID;
-  const member = new FlynetMemberClient({
-    accessToken,
-    serverURL: env.API_BASE_URL,
-  });
-  const userId = getAuthenticatedUserId(accessToken);
+  const base = env.API_BASE_URL; // unset = production
+  const merchantId = env.FLYNET_MERCHANT_ID; // omitted when unset
+  const headers = {
+    Authorization: `Bearer ${accessToken}`,
+    "Content-Type": "application/json",
+    "User-Agent": BROWSER_UA,
+  };
 
   try {
-    const intent = await member.createPaymentIntent({
-      ...(merchantId ? { flynetMerchantId: merchantId } : {}),
-      customerUserId: userId,
-      amount: { value: amountFlyWei, currency: "FLY" },
-      description: `Join market challenge: ${challenge.title}`,
-      idempotencyKey: crypto.randomUUID(),
-    } as Parameters<typeof member.createPaymentIntent>[0]);
-
-    const paid = await member.confirmPaymentIntent({
-      id: intent.id,
-      body: { userId },
+    // 1) Create the Payment Intent (REST). Snake_case body per the API docs.
+    const createRes = await fetch(`${base}/payment_intents`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        ...(merchantId ? { flynet_merchant_id: merchantId } : {}),
+        customer_user_id: restaurantId,
+        amount: { value: amountFlyWei, currency: "FLY" },
+        description: `Join market challenge: ${challenge.title}`,
+        idempotency_key: crypto.randomUUID(),
+      }),
     });
+    if (!createRes.ok) {
+      const detail = await readJson(createRes);
+      return NextResponse.json(
+        { error: "Couldn't start the payment.", status: createRes.status, detail },
+        { status: createRes.status === 401 ? 401 : 502 },
+      );
+    }
+    const intent = (await createRes.json()) as { id?: string };
+    if (!intent.id) {
+      return NextResponse.json(
+        { error: "Payment intent had no id." },
+        { status: 502 },
+      );
+    }
+
+    // 2) Confirm it (REST). Body is just the member's user id.
+    const confirmRes = await fetch(
+      `${base}/payment_intents/${intent.id}/confirm`,
+      { method: "POST", headers, body: JSON.stringify({ user_id: restaurantId }) },
+    );
+    if (!confirmRes.ok) {
+      const detail = await readJson(confirmRes);
+      return NextResponse.json(
+        { error: "Payment couldn't be confirmed.", status: confirmRes.status, detail },
+        { status: 502 },
+      );
+    }
+    const paid = (await confirmRes.json()) as {
+      id?: string;
+      status?: string;
+      paid_at?: string;
+      amount?: unknown;
+    };
 
     // Only record the join after the payment confirms.
     addJoinToChallenge(challenge.id, restaurantId);
@@ -96,17 +144,11 @@ export async function POST(req: Request) {
       payment: {
         id: paid.id,
         status: paid.status,
-        paidAt: paid.paidAt,
+        paidAt: paid.paid_at,
         amount: paid.amount,
       },
     });
-  } catch (error) {
-    if (error instanceof FlynetError) {
-      return NextResponse.json(
-        { error: error.message, kind: error.kind, code: error.code },
-        { status: error.status ?? 502 },
-      );
-    }
+  } catch {
     return NextResponse.json(
       { error: "Unexpected error processing the join payment." },
       { status: 500 },

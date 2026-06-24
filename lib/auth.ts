@@ -17,10 +17,14 @@ export const REFRESH_MAX_AGE = 30 * 24 * 60 * 60;
 // Everything the member routes + components need, including the pay button
 // (payment intents are scope-gated). Scope names are exact-match
 // ("read:profiles" is rejected) and routes outside these return 403.
+// Scope names are EXACT-MATCH. The check-in scope is `read:user_checkins`
+// (confirmed in the docs) — the starter previously had `read:checkins`, which
+// doesn't exist, so Blackbird rejected the ENTIRE authorize request with
+// `error=invalid_request` and sign-in never completed.
 export const SCOPES = [
   "read:profile",
   "read:wallets",
-  "read:checkins",
+  "read:user_checkins",
   "read:payment_intent",
   "write:payment_intent",
 ];
