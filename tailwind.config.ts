@@ -14,6 +14,10 @@ export default {
   ],
   theme: {
     extend: {
+      // Display script for the Challenge Hub wordmark (see app/layout.tsx).
+      fontFamily: {
+        display: ["var(--font-display)", "cursive"],
+      },
       // Semantic names over the CSS variables in app/globals.css. Components
       // use these classes (bg-surface-low, text-muted, …) — never raw hexes.
       colors: {

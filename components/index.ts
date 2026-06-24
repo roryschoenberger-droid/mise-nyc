@@ -1,5 +1,8 @@
 export { BirdMark } from "./bird-mark";
 export { Tag, type TagTone } from "./tag";
+export { ChallengeSection } from "./challenge-section";
+export { AppShell } from "./app-shell";
+export { Notice, Code } from "./notice";
 export { RestaurantCard } from "./restaurant-card";
 export { MarketChallengeCard } from "./market-challenge-card";
 export { JoinChallengeButton } from "./join-challenge-button";
