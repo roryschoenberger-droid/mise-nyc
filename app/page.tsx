@@ -37,13 +37,13 @@ export default async function Home({
           width={858}
           height={60}
           priority
-          className="h-auto w-[92vw] max-w-6xl"
+          className="h-auto w-full max-w-xl"
         />
       </div>
 
       {signedIn ? (
         <div className="flex flex-col items-center gap-6">
-          <nav className="flex flex-wrap items-center justify-center gap-3">
+          <nav className="grid w-full max-w-xl grid-cols-1 gap-2 sm:grid-cols-3">
             <HeroLink href="/my-challenges">My Challenges</HeroLink>
             <HeroLink href="/market">Market Challenges</HeroLink>
             <HeroLink href="/pitch">Pitch an Idea</HeroLink>
@@ -72,7 +72,7 @@ function HeroLink({ href, children }: { href: string; children: ReactNode }) {
   return (
     <Link
       href={href}
-      className="inline-flex h-11 items-center justify-center rounded-full border border-white/15 px-6 text-sm font-medium text-foreground transition hover:bg-white/10"
+      className="inline-flex h-11 w-full items-center justify-center whitespace-nowrap rounded-full border border-white/15 px-3 text-sm font-medium text-foreground transition hover:bg-white/10"
     >
       {children}
     </Link>
