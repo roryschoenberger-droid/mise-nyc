@@ -63,28 +63,36 @@ export default async function MyChallengesPage() {
             track every check-in and pay out when it&apos;s earned.
           </>
         }
-        emptyMessage="No challenges yet — your restaurant's challenges will show up here."
-        action={restaurantId ? <NewChallengeButton /> : null}
       >
-        {myChallenges.length > 0 || joinedMarketChallenges.length > 0 ? (
-          <div className="grid gap-4 sm:grid-cols-2">
-            {myChallenges.map((challenge) => (
-              <MyChallengeCard
-                key={challenge.id}
-                challenge={challenge}
-                checkInCount={progressFor(challenge)}
-              />
-            ))}
-            {joinedMarketChallenges.map((challenge) => (
-              <MyChallengeCard
-                key={challenge.id}
-                challenge={challenge}
-                market
-                checkInCount={progressFor(challenge)}
-              />
-            ))}
-          </div>
-        ) : null}
+        <div className="space-y-5">
+          {myChallenges.length > 0 || joinedMarketChallenges.length > 0 ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {myChallenges.map((challenge) => (
+                <MyChallengeCard
+                  key={challenge.id}
+                  challenge={challenge}
+                  checkInCount={progressFor(challenge)}
+                />
+              ))}
+              {joinedMarketChallenges.map((challenge) => (
+                <MyChallengeCard
+                  key={challenge.id}
+                  challenge={challenge}
+                  market
+                  checkInCount={progressFor(challenge)}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-white/10 bg-surface-low p-8 text-center">
+              <p className="text-sm text-muted">
+                No challenges yet — your restaurant&apos;s challenges will show up
+                here.
+              </p>
+            </div>
+          )}
+          {restaurantId ? <NewChallengeButton /> : null}
+        </div>
       </ChallengeSection>
     </AppShell>
   );
