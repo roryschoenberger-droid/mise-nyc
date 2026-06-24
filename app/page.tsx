@@ -12,6 +12,7 @@ import {
 import { ACCESS_COOKIE } from "../lib/auth";
 import { env } from "../lib/env";
 import {
+  getJoinedMarketChallenges,
   getMarketChallenges,
   getRestaurantChallenges,
 } from "../lib/market-challenges";
@@ -43,6 +44,9 @@ export default async function Home({
   // exactly their own. Decoded locally from the token — no Flynet call.
   const restaurantId = getAuthenticatedUserId(accessToken);
   const myChallenges = getRestaurantChallenges(restaurantId);
+  // Market challenges this manager has joined — shown in "My Challenges" too,
+  // tagged "Market" to set them apart from the restaurant's own challenges.
+  const joinedMarketChallenges = getJoinedMarketChallenges(restaurantId);
 
   return (
     <main className="mx-auto max-w-4xl space-y-10 p-6 sm:p-10">
@@ -66,10 +70,13 @@ export default async function Home({
         emptyMessage="No challenges yet — your restaurant's challenges will show up here."
         action={<NewChallengeButton />}
       >
-        {myChallenges.length > 0 ? (
+        {myChallenges.length > 0 || joinedMarketChallenges.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2">
             {myChallenges.map((challenge) => (
               <MyChallengeCard key={challenge.id} challenge={challenge} />
+            ))}
+            {joinedMarketChallenges.map((challenge) => (
+              <MyChallengeCard key={challenge.id} challenge={challenge} market />
             ))}
           </div>
         ) : null}
@@ -82,7 +89,11 @@ export default async function Home({
         {marketChallenges.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2">
             {marketChallenges.map((challenge) => (
-              <MarketChallengeCard key={challenge.id} challenge={challenge} />
+              <MarketChallengeCard
+                key={challenge.id}
+                challenge={challenge}
+                restaurantId={restaurantId}
+              />
             ))}
           </div>
         ) : null}

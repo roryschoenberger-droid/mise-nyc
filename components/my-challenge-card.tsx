@@ -27,10 +27,18 @@ function statusOf(
   return { label: "Active", tone: "success" };
 }
 
-// A restaurant-created challenge in the manager's "My Challenges" section.
-// Mirrors MarketChallengeCard's style; shows a lifecycle status instead of a
-// join button (managers own these, they don't join them).
-export function MyChallengeCard({ challenge }: { challenge: Challenge }) {
+// A challenge in the manager's "My Challenges" section. Mirrors
+// MarketChallengeCard's style; shows a lifecycle status instead of a join
+// button. Used both for the manager's own created challenges and for market
+// challenges they've joined — pass `market` to tag the latter with a "Market"
+// badge so they're distinguishable from the restaurant's own challenges.
+export function MyChallengeCard({
+  challenge,
+  market = false,
+}: {
+  challenge: Challenge;
+  market?: boolean;
+}) {
   const reward = formatFly(challenge.fly_reward.value, 0);
   const window = formatWindow(challenge.start_time, challenge.end_time);
   const status = statusOf(challenge.start_time, challenge.end_time);
@@ -43,7 +51,10 @@ export function MyChallengeCard({ challenge }: { challenge: Challenge }) {
     <article className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-surface-low p-5">
       <div className="flex items-start justify-between gap-3">
         <h3 className="text-lg font-semibold leading-snug">{challenge.title}</h3>
-        <Tag tone="primary">{challenge.type}</Tag>
+        <div className="flex shrink-0 items-center gap-1.5">
+          {market ? <Tag tone="neutral">Market</Tag> : null}
+          <Tag tone="primary">{challenge.type}</Tag>
+        </div>
       </div>
 
       <p className="text-sm leading-relaxed text-muted">

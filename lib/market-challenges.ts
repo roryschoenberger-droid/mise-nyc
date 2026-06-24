@@ -70,6 +70,38 @@ export function getRestaurantChallenges(restaurantId?: string): Challenge[] {
   );
 }
 
+// Find a single challenge by id (any source). Used by the join route to look up
+// the join fee before charging.
+export function getChallengeById(id: string): Challenge | undefined {
+  return readChallenges().find((c) => c.id === id);
+}
+
+// Market challenges a given manager has joined (their restaurantId is in
+// joinedBy). Shown in "My Challenges" alongside their own created challenges.
+export function getJoinedMarketChallenges(restaurantId: string): Challenge[] {
+  return readChallenges().filter(
+    (c) => c.source === "blackbird" && c.joinedBy.includes(restaurantId),
+  );
+}
+
+// Record that a restaurant joined a market challenge: add its id to the
+// challenge's joinedBy array. Safe read-modify-write so we never clobber the
+// seeded data. Idempotent — joining twice is a no-op. Returns the updated
+// challenge, or undefined if the id wasn't found.
+export function addJoinToChallenge(
+  challengeId: string,
+  restaurantId: string,
+): Challenge | undefined {
+  const all = readChallenges();
+  const challenge = all.find((c) => c.id === challengeId);
+  if (!challenge) return undefined;
+  if (!challenge.joinedBy.includes(restaurantId)) {
+    challenge.joinedBy.push(restaurantId);
+    writeChallenges(all);
+  }
+  return challenge;
+}
+
 // What a caller supplies to create a restaurant challenge. The store fills in
 // the rest (id, object, source, joinedBy) so callers can't forge those.
 export interface NewRestaurantChallengeInput {

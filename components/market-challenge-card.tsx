@@ -1,6 +1,7 @@
 import { formatFly } from "@flynetdev/core";
 import type { Challenge } from "../lib/market-challenges";
 import { Tag } from "./tag";
+import { JoinChallengeButton } from "./join-challenge-button";
 
 // "Jun 11 – Jul 19, 2026" for the challenge window. Falls back gracefully if a
 // timestamp is unparseable.
@@ -17,13 +18,21 @@ function formatWindow(start: string, end: string): string {
   return `${startLabel} – ${endLabel}`;
 }
 
-// One Blackbird-wide market challenge. Server-safe — render straight from
-// getMarketChallenges(). The Join button is intentionally disabled; payment is
-// wired in a later slice.
-export function MarketChallengeCard({ challenge }: { challenge: Challenge }) {
+// One Blackbird-wide market challenge. Server component — render straight from
+// getMarketChallenges(). The Join button is a client island that runs the $FLY
+// Payment Intent on click. Pass the signed-in manager's restaurantId so the
+// card can show "Joined ✓" on load if they've already joined.
+export function MarketChallengeCard({
+  challenge,
+  restaurantId,
+}: {
+  challenge: Challenge;
+  restaurantId: string;
+}) {
   const reward = formatFly(challenge.fly_reward.value, 0);
   const joinFee = formatFly(challenge.join_fee_fly_wei, 0);
   const window = formatWindow(challenge.start_time, challenge.end_time);
+  const alreadyJoined = challenge.joinedBy.includes(restaurantId);
 
   return (
     <article className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-surface-low p-5">
@@ -43,17 +52,11 @@ export function MarketChallengeCard({ challenge }: { challenge: Challenge }) {
         {window && <span className="text-muted">{window}</span>}
       </div>
 
-      <div className="mt-1 flex items-center justify-between gap-3">
-        <span className="text-xs text-muted">Join fee: {joinFee} $FLY</span>
-        <button
-          type="button"
-          disabled
-          title="Payment lands in a later slice"
-          className="inline-flex h-10 items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground transition duration-150 ease-standard disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          Join — coming soon
-        </button>
-      </div>
+      <JoinChallengeButton
+        challengeId={challenge.id}
+        joinFeeLabel={joinFee}
+        alreadyJoined={alreadyJoined}
+      />
     </article>
   );
 }
