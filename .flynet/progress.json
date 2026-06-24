@@ -1,7 +1,7 @@
 {
   "feature": "challenge-hub",
   "createdAt": "2026-06-24T15:34:01.325Z",
-  "updatedAt": "2026-06-24T15:44:46.407Z",
+  "updatedAt": "2026-06-24T15:49:26.598Z",
   "tasks": [
     {
       "id": "01",
@@ -37,21 +37,21 @@
       "id": "04",
       "title": "Join market challenge with $FLY payment",
       "issue": ".scratch/challenge-hub/issues/04-join-market-challenge-payment.md",
-      "status": "in_progress",
+      "status": "done",
       "agent": "slice-04",
-      "commit": null,
+      "commit": "a1a323f439175fe7d5bfde63d275c200ed6b419a",
       "note": null,
-      "updatedAt": "2026-06-24T15:44:46.407Z"
+      "updatedAt": "2026-06-24T15:46:38.728Z"
     },
     {
       "id": "05",
       "title": "Check-in progress tracker",
       "issue": ".scratch/challenge-hub/issues/05-checkin-progress-tracker.md",
-      "status": "pending",
-      "agent": null,
+      "status": "in_progress",
+      "agent": "slice-05",
       "commit": null,
       "note": null,
-      "updatedAt": "2026-06-24T15:34:01.327Z"
+      "updatedAt": "2026-06-24T15:49:26.597Z"
     },
     {
       "id": "06",

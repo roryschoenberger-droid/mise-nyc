@@ -10,7 +10,12 @@ import {
   NewChallengeButton,
 } from "../components";
 import { ACCESS_COOKIE } from "../lib/auth";
+import {
+  countCheckInsInWindow,
+  getRestaurantCheckInTimes,
+} from "../lib/check-ins";
 import { env } from "../lib/env";
+import type { Challenge } from "../lib/market-challenges";
 import {
   getJoinedMarketChallenges,
   getMarketChallenges,
@@ -48,6 +53,24 @@ export default async function Home({
   // tagged "Market" to set them apart from the restaurant's own challenges.
   const joinedMarketChallenges = getJoinedMarketChallenges(restaurantId);
 
+  // Check-in progress for DINES challenges. Fetch the restaurant's check-in
+  // timestamps ONCE (read-only Discovery call) and count per-challenge in
+  // memory — no per-card fetch, no polling. `null` means the count couldn't be
+  // determined (no API key, or the feed errored); the card then renders "—".
+  // The Promise.resolve(null) branch keeps the page rendering when the key is
+  // unset rather than fetching with an empty key.
+  const checkInTimes = env.FLYNET_API_KEY
+    ? await getRestaurantCheckInTimes(env.FLYNET_API_KEY, restaurantId)
+    : null;
+  const progressFor = (challenge: Challenge): number | null | undefined =>
+    challenge.type === "DINES"
+      ? countCheckInsInWindow(
+          checkInTimes,
+          challenge.start_time,
+          challenge.end_time,
+        )
+      : undefined;
+
   return (
     <main className="mx-auto max-w-4xl space-y-10 p-6 sm:p-10">
       <header className="flex items-start justify-between gap-4">
@@ -73,10 +96,19 @@ export default async function Home({
         {myChallenges.length > 0 || joinedMarketChallenges.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2">
             {myChallenges.map((challenge) => (
-              <MyChallengeCard key={challenge.id} challenge={challenge} />
+              <MyChallengeCard
+                key={challenge.id}
+                challenge={challenge}
+                checkInCount={progressFor(challenge)}
+              />
             ))}
             {joinedMarketChallenges.map((challenge) => (
-              <MyChallengeCard key={challenge.id} challenge={challenge} market />
+              <MyChallengeCard
+                key={challenge.id}
+                challenge={challenge}
+                market
+                checkInCount={progressFor(challenge)}
+              />
             ))}
           </div>
         ) : null}
