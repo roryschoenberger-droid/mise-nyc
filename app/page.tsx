@@ -1,8 +1,14 @@
 import type { ReactNode } from "react";
 import { cookies } from "next/headers";
-import { BirdMark, LoginButton, LogoutButton } from "../components";
+import {
+  BirdMark,
+  LoginButton,
+  LogoutButton,
+  MarketChallengeCard,
+} from "../components";
 import { ACCESS_COOKIE } from "../lib/auth";
 import { env } from "../lib/env";
+import { getMarketChallenges } from "../lib/market-challenges";
 
 // Challenge Hub — the restaurant-facing dashboard.
 //   • Unauthenticated visitors get a full-screen sign-in card.
@@ -25,6 +31,8 @@ export default async function Home({
   if (!accessToken) {
     return <SignIn authError={authError} />;
   }
+
+  const marketChallenges = getMarketChallenges();
 
   return (
     <main className="mx-auto max-w-4xl space-y-10 p-6 sm:p-10">
@@ -51,7 +59,15 @@ export default async function Home({
       <ChallengeSection
         title="Market Challenges"
         emptyMessage="No market challenges yet — Blackbird-wide events will appear here."
-      />
+      >
+        {marketChallenges.length > 0 ? (
+          <div className="grid gap-4 sm:grid-cols-2">
+            {marketChallenges.map((challenge) => (
+              <MarketChallengeCard key={challenge.id} challenge={challenge} />
+            ))}
+          </div>
+        ) : null}
+      </ChallengeSection>
     </main>
   );
 }
@@ -61,16 +77,20 @@ export default async function Home({
 function ChallengeSection({
   title,
   emptyMessage,
+  children,
 }: {
   title: string;
   emptyMessage: string;
+  children?: ReactNode;
 }) {
   return (
     <section className="space-y-3">
       <h2 className="text-xs uppercase tracking-[0.16em] text-muted">{title}</h2>
-      <div className="rounded-2xl border border-white/10 bg-surface-low p-8 text-center">
-        <p className="text-sm text-muted">{emptyMessage}</p>
-      </div>
+      {children ?? (
+        <div className="rounded-2xl border border-white/10 bg-surface-low p-8 text-center">
+          <p className="text-sm text-muted">{emptyMessage}</p>
+        </div>
+      )}
     </section>
   );
 }

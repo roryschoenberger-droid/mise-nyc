@@ -1,27 +1,27 @@
 {
   "feature": "challenge-hub",
   "createdAt": "2026-06-24T15:34:01.325Z",
-  "updatedAt": "2026-06-24T15:35:01.448Z",
+  "updatedAt": "2026-06-24T15:37:20.042Z",
   "tasks": [
     {
       "id": "01",
       "title": "Dashboard shell",
       "issue": ".scratch/challenge-hub/issues/01-dashboard-shell.md",
-      "status": "in_progress",
+      "status": "done",
       "agent": "slice-01",
-      "commit": null,
+      "commit": "8c820dfaecef68bddcedd2b750105534d4bed8f1",
       "note": null,
-      "updatedAt": "2026-06-24T15:35:01.448Z"
+      "updatedAt": "2026-06-24T15:36:14.554Z"
     },
     {
       "id": "02",
       "title": "Market challenges list",
       "issue": ".scratch/challenge-hub/issues/02-market-challenges-list.md",
-      "status": "pending",
-      "agent": null,
+      "status": "in_progress",
+      "agent": "slice-02",
       "commit": null,
       "note": null,
-      "updatedAt": "2026-06-24T15:34:01.326Z"
+      "updatedAt": "2026-06-24T15:37:20.041Z"
     },
     {
       "id": "03",
