@@ -17,10 +17,6 @@ export default {
       // Semantic names over the CSS variables in app/globals.css. Components
       // use these classes (bg-surface-low, text-muted, …) — never raw hexes.
       colors: {
-        // Brand neutral: literal `bg-black` across the app resolves to lagoon
-        // (opacity modifiers still work via <alpha-value>). `white` is left as
-        // Tailwind's default true white. Defined in app/globals.css.
-        black: rgb("--lagoon"),
         background: rgb("--surface-bg"),
         "background-darker": rgb("--surface-bg-darker"),
         surface: {

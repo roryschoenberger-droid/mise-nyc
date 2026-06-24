@@ -11,10 +11,10 @@
       "count": 5
     },
     "fly_reward": {
-      "value": "500000000000000000000",
+      "value": "1500000000000000000000",
       "currency": "FLY"
     },
-    "join_fee_fly_wei": "25000000000000000000",
+    "join_fee_fly_wei": "2500000000000000000000",
     "start_time": "2026-06-11T00:00:00.000Z",
     "end_time": "2026-07-19T23:59:59.000Z",
     "terms": "Reward paid in $FLY after 5 verified check-ins at participating sports bars during World Cup match windows. One reward per restaurant.",
@@ -37,10 +37,31 @@
       "value": "100000000000000000000",
       "currency": "FLY"
     },
-    "join_fee_fly_wei": "10000000000000000000",
+    "join_fee_fly_wei": "1000000000000000000000",
     "start_time": "2026-07-01T00:00:00.000Z",
     "end_time": "2026-07-02T00:00:00.000Z",
     "terms": "Reward paid in $FLY after 3 verified check-ins at distinct ice cream spots within a single 24-hour window. One reward per restaurant.",
+    "joinedBy": []
+  },
+  {
+    "id": "blackbird-rainbow-crawl",
+    "object": "challenge",
+    "source": "blackbird",
+    "market": "NYC",
+    "type": "DINES",
+    "title": "🌈 Rainbow Crawl",
+    "description": "Visit 7 restaurants serving a dish for each color of the rainbow during Pride Month. Complete all seven colors before June 30th.",
+    "threshold": {
+      "count": 7
+    },
+    "fly_reward": {
+      "value": "2000000000000000000000",
+      "currency": "FLY"
+    },
+    "join_fee_fly_wei": "3000000000000000000000",
+    "start_time": "2026-06-01T00:00:00.000Z",
+    "end_time": "2026-06-30T23:59:59.000Z",
+    "terms": "Reward paid in $FLY after 7 verified check-ins — one dish for each color of the rainbow — at participating restaurants before June 30. One reward per restaurant.",
     "joinedBy": []
   },
   {

@@ -5,6 +5,7 @@ export { MarketChallengeCard } from "./market-challenge-card";
 export { JoinChallengeButton } from "./join-challenge-button";
 export { MyChallengeCard } from "./my-challenge-card";
 export { NewChallengeButton } from "./new-challenge-button";
+export { SuggestChallengeForm } from "./suggest-challenge-form";
 export { UserCard } from "./user-card";
 export { BBPayButton } from "./bb-pay-button";
 export { LoginButton } from "./login-button";

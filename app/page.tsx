@@ -8,6 +8,7 @@ import {
   MarketChallengeCard,
   MyChallengeCard,
   NewChallengeButton,
+  SuggestChallengeForm,
 } from "../components";
 import { ACCESS_COOKIE } from "../lib/auth";
 import {
@@ -192,6 +193,22 @@ export default async function Home({
           </div>
         ) : null}
       </ChallengeSection>
+
+      {restaurantId ? (
+        <ChallengeSection
+          title="Pitch Blackbird a Challenge"
+          subtitle={
+            <>
+              Know what would pack rooms in your city? Pitch Blackbird a
+              market-wide challenge worth running here. The team reads every
+              idea.
+            </>
+          }
+          emptyMessage=""
+        >
+          <SuggestChallengeForm market={restaurantMarket} />
+        </ChallengeSection>
+      ) : null}
     </main>
   );
 }
