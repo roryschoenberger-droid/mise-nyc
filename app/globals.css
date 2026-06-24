@@ -15,32 +15,38 @@
   --core-primary-bright: 255 220 238; /* #ffdcee */
   --core-on-primary: 30 10 20;
 
+  /* Brand neutral — "black" → lagoon, mapped onto Tailwind's `black` in
+     tailwind.config.ts so every literal bg-black across the app recolors here.
+     `white` stays true white (crisp on lagoon). */
+  --lagoon: 0 74 63; /* #004A3F */
+
   /* Semantic */
   --success: 44 225 152; /* #2ce198 */
   --failure: 255 84 73; /* #ff5449 */
   --brand-yellow: 255 240 102; /* #fff066 */
 
-  /* Surfaces — dark ladder */
-  --surface-bg: 20 20 20; /* #141414 */
-  --surface-bg-darker: 11 11 11; /* #0b0b0b */
-  --surface-container-lowest: 7 7 7; /* #070707 */
-  --surface-container-low: 27 27 27; /* #1b1b1b */
-  --surface-container: 34 34 34; /* #222222 */
-  --surface-container-high: 41 41 41; /* #292929 */
-  --surface-container-highest: 52 52 52; /* #343434 */
+  /* Surfaces — lagoon ladder (was a near-black ladder). The canvas is a deep
+     lagoon; raised containers step up to the brand lagoon and lighter. */
+  --surface-bg: 0 58 49; /* #003A31 — deep lagoon canvas */
+  --surface-bg-darker: 0 46 39; /* #002E27 */
+  --surface-container-lowest: 0 40 34; /* #002822 */
+  --surface-container-low: 0 74 63; /* #004A3F — brand lagoon */
+  --surface-container: 8 86 74; /* #08564A */
+  --surface-container-high: 17 99 86; /* #116356 */
+  --surface-container-highest: 28 112 98; /* #1C7062 */
 
-  /* Text */
-  --on-surface: 252 252 252; /* #fcfcfc */
-  --on-surface-alt: 171 171 171; /* #ababab */
-  --outline: 146 143 153; /* #928f99 */
+  /* Text — white / light neutrals (crisp on lagoon) */
+  --on-surface: 252 252 252; /* #fcfcfc — primary text */
+  --on-surface-alt: 209 224 222; /* #D1E0DE — muted text (faint sage tint) */
+  --outline: 146 162 160; /* #92A2A0 */
 
-  /* Borders */
-  --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.16);
+  /* Borders — white-tinted */
+  --border: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.18);
 
   /* Selection */
-  --selection-bg: 200 191 255; /* #c8bfff */
-  --selection-fg: 0 0 0;
+  --selection-bg: 252 252 252; /* white */
+  --selection-fg: 0 74 63; /* #004A3F lagoon */
 
   /* Motion */
   --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);

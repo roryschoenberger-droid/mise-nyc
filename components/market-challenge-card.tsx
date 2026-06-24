@@ -25,20 +25,29 @@ function formatWindow(start: string, end: string): string {
 export function MarketChallengeCard({
   challenge,
   restaurantId,
+  restaurantMarket,
 }: {
   challenge: Challenge;
   restaurantId: string;
+  restaurantMarket: string;
 }) {
   const reward = formatFly(challenge.fly_reward.value, 0);
   const joinFee = formatFly(challenge.join_fee_fly_wei, 0);
   const window = formatWindow(challenge.start_time, challenge.end_time);
   const alreadyJoined = challenge.joinedBy.includes(restaurantId);
+  // Only restaurants in the challenge's market may join.
+  const wrongMarket = Boolean(
+    challenge.market && challenge.market !== restaurantMarket,
+  );
 
   return (
     <article className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-surface-low p-5">
       <div className="flex items-start justify-between gap-3">
         <h3 className="text-lg font-semibold leading-snug">{challenge.title}</h3>
-        <Tag tone="primary">{challenge.type}</Tag>
+        <div className="flex shrink-0 flex-wrap justify-end gap-1.5">
+          {challenge.market ? <Tag>{challenge.market}</Tag> : null}
+          <Tag tone="primary">{challenge.type}</Tag>
+        </div>
       </div>
 
       <p className="text-sm leading-relaxed text-muted">
@@ -56,6 +65,8 @@ export function MarketChallengeCard({
         challengeId={challenge.id}
         joinFeeLabel={joinFee}
         alreadyJoined={alreadyJoined}
+        wrongMarket={wrongMarket}
+        challengeMarket={challenge.market}
       />
     </article>
   );

@@ -21,6 +21,7 @@ import {
   getMarketChallenges,
   getRestaurantChallenges,
 } from "../lib/market-challenges";
+import { getRestaurantMarket } from "../lib/markets";
 
 // Challenge Hub — the restaurant-facing dashboard.
 //   • Unauthenticated visitors get a full-screen sign-in card.
@@ -56,6 +57,9 @@ export default async function Home({
   } catch {
     restaurantId = null;
   }
+  // Which market this restaurant is in — gates which market challenges it can
+  // join. Detection lives in lib/markets.ts (dev default for now).
+  const restaurantMarket = restaurantId ? getRestaurantMarket(restaurantId) : "";
   const myChallenges = restaurantId ? getRestaurantChallenges(restaurantId) : [];
   // Market challenges this manager has joined — shown in "My Challenges" too,
   // tagged "Market" to set them apart from the restaurant's own challenges.
@@ -99,6 +103,20 @@ export default async function Home({
         {signedInViaOAuth ? <LogoutButton href="/api/auth/logout" /> : null}
       </header>
 
+      <section className="max-w-2xl rounded-2xl border border-white/10 bg-surface-low p-6 sm:p-7">
+        <h2 className="text-lg font-semibold tracking-tight">
+          Turn quiet shifts into full rooms.
+        </h2>
+        <p className="mt-2 text-sm leading-relaxed text-muted">
+          Challenge Hub is where you create dining challenges that bring guests
+          back when you need them most — then reward the ones who show up, in
+          $FLY. Build your own to fill seats on a slow night or a soft season,
+          or join Blackbird&apos;s market-wide events to put your restaurant in
+          front of the whole network. You set the goal and the reward; we track
+          every check-in and handle the payout.
+        </p>
+      </section>
+
       {restaurantId ? null : (
         <Notice tone="error" title="We couldn't read your Blackbird account">
           Your current session token isn&apos;t a Blackbird member login, so
@@ -111,6 +129,18 @@ export default async function Home({
 
       <ChallengeSection
         title="My Challenges"
+        subtitle={
+          <>
+            Your own dining challenges — built to fill seats when you need it
+            most. Reward regulars for turning up on a dead Tuesday, turn a slow
+            January into a reason to book, or simply thank the guests who keep
+            coming back — all in $FLY. Set the goal (say, dine three Tuesdays)
+            and the reward; we&apos;ll track every check-in and pay out when
+            it&apos;s earned. Hit{" "}
+            <strong className="font-medium text-foreground">New Challenge</strong>{" "}
+            to build one.
+          </>
+        }
         emptyMessage="No challenges yet — your restaurant's challenges will show up here."
         action={restaurantId ? <NewChallengeButton /> : null}
       >
@@ -137,6 +167,16 @@ export default async function Home({
 
       <ChallengeSection
         title="Market Challenges"
+        subtitle={
+          <>
+            Blackbird-wide events that run across the whole network — themed
+            crawls, seasonal pushes, citywide moments your restaurant can be
+            part of. Pay the $FLY join fee to add your spot to the lineup and
+            get in front of every diner chasing one. Hit{" "}
+            <strong className="font-medium text-foreground">Join</strong> on any
+            challenge.
+          </>
+        }
         emptyMessage="No market challenges yet — Blackbird-wide events will appear here."
       >
         {marketChallenges.length > 0 ? (
@@ -146,6 +186,7 @@ export default async function Home({
                 key={challenge.id}
                 challenge={challenge}
                 restaurantId={restaurantId ?? ""}
+                restaurantMarket={restaurantMarket}
               />
             ))}
           </div>
@@ -159,20 +200,27 @@ export default async function Home({
 // challenge grid lands in a later slice — this is the shell.
 function ChallengeSection({
   title,
+  subtitle,
   emptyMessage,
   action,
   children,
 }: {
   title: string;
+  subtitle?: ReactNode;
   emptyMessage: string;
   action?: ReactNode;
   children?: ReactNode;
 }) {
   return (
     <section className="space-y-3">
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="text-xs uppercase tracking-[0.16em] text-muted">{title}</h2>
-        {action}
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-xs uppercase tracking-[0.16em] text-muted">{title}</h2>
+          {action}
+        </div>
+        {subtitle ? (
+          <p className="max-w-2xl text-sm leading-relaxed text-muted">{subtitle}</p>
+        ) : null}
       </div>
       {children ?? (
         <div className="rounded-2xl border border-white/10 bg-surface-low p-8 text-center">

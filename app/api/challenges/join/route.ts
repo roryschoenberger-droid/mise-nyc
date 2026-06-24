@@ -6,6 +6,7 @@ import {
   addJoinToChallenge,
   getChallengeById,
 } from "../../../../lib/market-challenges";
+import { getRestaurantMarket } from "../../../../lib/markets";
 
 // Join a market challenge by paying its $FLY join fee. Server-side, because the
 // Payment Intent lifecycle belongs on the backend — the browser only says
@@ -66,6 +67,19 @@ export async function POST(req: Request) {
   // Stable owner id from the member token (decoded locally, no API call) — the
   // same id the page uses to scope "My Challenges".
   const restaurantId = getAuthenticatedUserId(accessToken);
+
+  // Market gate: a market-wide challenge can only be joined by restaurants in
+  // that market. Never charge before this check.
+  const restaurantMarket = getRestaurantMarket(restaurantId);
+  if (challenge.market && challenge.market !== restaurantMarket) {
+    return NextResponse.json(
+      {
+        error: `This challenge is for ${challenge.market} restaurants. Yours is in ${restaurantMarket}.`,
+        wrongMarket: true,
+      },
+      { status: 403 },
+    );
+  }
 
   // Already joined? Don't charge again — return the joined state.
   if (challenge.joinedBy.includes(restaurantId)) {

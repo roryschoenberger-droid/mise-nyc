@@ -27,6 +27,9 @@ export interface Challenge {
   id: string;
   object: "challenge";
   source: "blackbird" | "restaurant";
+  // Which market this market-wide challenge belongs to (e.g. "NYC"). Only
+  // restaurants in this market may join. Unset on restaurant-created challenges.
+  market?: string;
   type: ChallengeType;
   title: string;
   description: string;

@@ -15,10 +15,14 @@ export function JoinChallengeButton({
   challengeId,
   joinFeeLabel,
   alreadyJoined,
+  wrongMarket = false,
+  challengeMarket,
 }: {
   challengeId: string;
   joinFeeLabel: string;
   alreadyJoined: boolean;
+  wrongMarket?: boolean;
+  challengeMarket?: string;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -51,6 +55,18 @@ export function JoinChallengeButton({
         <span className="text-xs text-muted">Join fee: {joinFeeLabel} $FLY</span>
         <span className="inline-flex h-10 items-center justify-center rounded-full bg-success/15 px-5 text-sm font-semibold text-success">
           Joined ✓
+        </span>
+      </div>
+    );
+  }
+
+  // Restaurant isn't in this challenge's market — can't join. Show why, no button.
+  if (wrongMarket) {
+    return (
+      <div className="mt-1 flex items-center justify-between gap-3">
+        <span className="text-xs text-muted">Join fee: {joinFeeLabel} $FLY</span>
+        <span className="inline-flex h-10 items-center justify-center rounded-full border border-white/10 px-5 text-sm font-medium text-muted">
+          {challengeMarket ? `${challengeMarket} restaurants only` : "Not your market"}
         </span>
       </div>
     );
