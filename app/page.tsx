@@ -230,14 +230,14 @@ function ChallengeSection({
 }) {
   return (
     <section className="space-y-3">
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+        <div className="space-y-1.5">
           <h2 className="text-xs uppercase tracking-[0.16em] text-muted">{title}</h2>
-          {action}
+          {subtitle ? (
+            <p className="max-w-2xl text-sm leading-relaxed text-muted">{subtitle}</p>
+          ) : null}
         </div>
-        {subtitle ? (
-          <p className="max-w-2xl text-sm leading-relaxed text-muted">{subtitle}</p>
-        ) : null}
+        {action ? <div className="shrink-0">{action}</div> : null}
       </div>
       {children ?? (
         <div className="rounded-2xl border border-white/10 bg-surface-low p-8 text-center">
