@@ -1,0 +1,67 @@
+{
+  "feature": "challenge-hub",
+  "createdAt": "2026-06-24T15:34:01.325Z",
+  "updatedAt": "2026-06-24T15:35:01.448Z",
+  "tasks": [
+    {
+      "id": "01",
+      "title": "Dashboard shell",
+      "issue": ".scratch/challenge-hub/issues/01-dashboard-shell.md",
+      "status": "in_progress",
+      "agent": "slice-01",
+      "commit": null,
+      "note": null,
+      "updatedAt": "2026-06-24T15:35:01.448Z"
+    },
+    {
+      "id": "02",
+      "title": "Market challenges list",
+      "issue": ".scratch/challenge-hub/issues/02-market-challenges-list.md",
+      "status": "pending",
+      "agent": null,
+      "commit": null,
+      "note": null,
+      "updatedAt": "2026-06-24T15:34:01.326Z"
+    },
+    {
+      "id": "03",
+      "title": "Create and view my challenges",
+      "issue": ".scratch/challenge-hub/issues/03-create-view-my-challenges.md",
+      "status": "pending",
+      "agent": null,
+      "commit": null,
+      "note": null,
+      "updatedAt": "2026-06-24T15:34:01.327Z"
+    },
+    {
+      "id": "04",
+      "title": "Join market challenge with $FLY payment",
+      "issue": ".scratch/challenge-hub/issues/04-join-market-challenge-payment.md",
+      "status": "pending",
+      "agent": null,
+      "commit": null,
+      "note": null,
+      "updatedAt": "2026-06-24T15:34:01.327Z"
+    },
+    {
+      "id": "05",
+      "title": "Check-in progress tracker",
+      "issue": ".scratch/challenge-hub/issues/05-checkin-progress-tracker.md",
+      "status": "pending",
+      "agent": null,
+      "commit": null,
+      "note": null,
+      "updatedAt": "2026-06-24T15:34:01.327Z"
+    },
+    {
+      "id": "06",
+      "title": "Issue reward payout on completion",
+      "issue": ".scratch/challenge-hub/issues/06-issue-reward-payout.md",
+      "status": "pending",
+      "agent": null,
+      "commit": null,
+      "note": null,
+      "updatedAt": "2026-06-24T15:34:01.327Z"
+    }
+  ]
+}

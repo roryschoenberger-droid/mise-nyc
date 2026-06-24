@@ -1,147 +1,102 @@
 import type { ReactNode } from "react";
 import { cookies } from "next/headers";
-import { LoginButton, LogoutButton } from "../components";
-import { OpenDevSetupButton } from "../components/dev-drawer";
+import { BirdMark, LoginButton, LogoutButton } from "../components";
 import { ACCESS_COOKIE } from "../lib/auth";
 import { env } from "../lib/env";
-import { getLeaderboardData } from "../lib/leaderboard-data";
-import type { RankedRestaurant } from "../lib/leaderboard-data";
-import { MakeYourOwnCollab } from "./collabs/make-your-own";
-import { OnboardingBanner } from "./components/onboarding-banner";
-import { MemberPanel } from "./member-panel";
-import { CollabsView } from "./leaderboard/collabs-view";
 
-// The whole starter in one screen:
-//   1. Read restaurants from Flynet Discovery (server-side, with your API key).
-//   2. The member section: an ACCESS_TOKEN env var wins if set; otherwise the
-//      OAuth session cookie (set by the sign-in flow); otherwise a sign-in button.
+// Challenge Hub — the restaurant-facing dashboard.
+//   • Unauthenticated visitors get a full-screen sign-in card.
+//   • Authenticated managers get the dashboard shell: two sections, "My
+//     Challenges" and "Market Challenges", both empty for now.
 //
-// Discovery runs HERE, on the server. The API key is read from the environment
-// and never reaches the browser — that is the one security rule that matters.
+// Auth state is resolved server-side exactly like the rest of the starter: an
+// ACCESS_TOKEN env var wins if set; otherwise the OAuth session cookie (set by
+// the sign-in flow); otherwise we show the sign-in screen.
 export default async function Home({
   searchParams,
 }: {
   searchParams: Promise<{ auth_error?: string }>;
 }) {
-  const apiKey = env.FLYNET_API_KEY;
   const { auth_error: authError } = await searchParams;
   const cookieToken = (await cookies()).get(ACCESS_COOKIE)?.value;
   const accessToken = env.ACCESS_TOKEN || cookieToken;
   const signedInViaOAuth = !env.ACCESS_TOKEN && Boolean(cookieToken);
 
-  const { collabs: allCollabs, restaurants } = apiKey
-    ? await getLeaderboardData(apiKey)
-    : { collabs: [], restaurants: [] };
-  const topCollabs = allCollabs.slice(0, 5);
+  if (!accessToken) {
+    return <SignIn authError={authError} />;
+  }
 
   return (
-    <main className="mx-auto max-w-2xl space-y-10 p-10">
-      <OnboardingBanner />
-      <header>
-        <h1 className="mt-2 flex items-center gap-3 text-3xl font-semibold tracking-tight">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/hummingbird.webp" alt="" aria-hidden className="h-12 w-12 shrink-0" style={{ filter: "invert(0.92)" }} />
-          Mise
-        </h1>
-        <p className="mt-2 text-muted">
-          Everything in its right place. Where restaurants find their people — and their next great collab.
-        </p>
-        <a href="/claim" className="mt-4 inline-block text-sm font-semibold text-primary hover:opacity-80">
-          Claim your spot →
-        </a>
+    <main className="mx-auto max-w-4xl space-y-10 p-6 sm:p-10">
+      <header className="flex items-start justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-black">
+            <BirdMark size={20} className="text-white" />
+          </span>
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">Challenge Hub</h1>
+            <p className="text-sm text-muted">
+              Create challenges, browse the market, bring diners back.
+            </p>
+          </div>
+        </div>
+        {signedInViaOAuth ? <LogoutButton href="/api/auth/logout" /> : null}
       </header>
 
+      <ChallengeSection
+        title="My Challenges"
+        emptyMessage="No challenges yet — your restaurant's challenges will show up here."
+      />
 
-      {topCollabs.length > 0 && (
-        <section className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xs uppercase tracking-[0.16em] text-muted">✦ Top Collabs</h2>
-            <a href="/collabs" className="text-xs text-primary hover:opacity-80">
-              See all →
-            </a>
-          </div>
-          <CollabsView pairs={topCollabs} />
-        </section>
-      )}
-
-      {restaurants.length > 0 && (
-        <MakeYourOwnCollab restaurants={restaurants} />
-      )}
-
-      {apiKey && (
-        <section className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xs uppercase tracking-[0.16em] text-muted">🏆 NYC Blackbird Restaurants Leaderboard</h2>
-            <a href="/leaderboard" className="text-xs text-primary hover:opacity-80">
-              See all →
-            </a>
-          </div>
-          <LeaderboardPreview apiKey={apiKey} />
-        </section>
-      )}
-
-      {authError ? <AuthErrorNotice error={authError} /> : null}
-
-      {accessToken ? (
-        <>
-          <MemberPanel accessToken={accessToken} />
-          {signedInViaOAuth ? <LogoutButton href="/api/auth/logout" /> : null}
-        </>
-      ) : (
-        <SignInNotice />
-      )}
-
-      {/* 👉 Your code goes here.
-          The branded building blocks live in ./components — RestaurantCard,
-          UserCard, Tag, BBPayButton, LoginButton. The SDK's own catalog and
-          hooks live in @flynetdev/react. */}
+      <ChallengeSection
+        title="Market Challenges"
+        emptyMessage="No market challenges yet — Blackbird-wide events will appear here."
+      />
     </main>
   );
 }
 
-
-function SetupNotice() {
-  // The Dev Setup drawer only exists in dev builds (see layout.tsx). In dev,
-  // make the big call to action "open the drawer"; in production there's no
-  // drawer, so fall back to pointing at the hosting env vars.
-  const isDev = process.env.NODE_ENV !== "production";
+// One dashboard section with a heading and (for now) an empty state. The
+// challenge grid lands in a later slice — this is the shell.
+function ChallengeSection({
+  title,
+  emptyMessage,
+}: {
+  title: string;
+  emptyMessage: string;
+}) {
   return (
-    <div className="rounded-3xl border border-primary/30 bg-primary/5 p-8 text-center">
-      <p className="text-xs uppercase tracking-[0.2em] text-primary">
-        Get started
-      </p>
-      <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
-        Add your Blackbird credentials
-      </h2>
-      <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted">
-        {isDev
-          ? "This app needs your Discovery API key and OAuth credentials to load real restaurant and member data. The Dev Setup drawer walks you through each one and verifies it before saving."
-          : "Set FLYNET_API_KEY and your OAuth credentials in your hosting environment variables, then redeploy to see real Blackbird data."}
-      </p>
-      {isDev ? (
-        <OpenDevSetupButton className="mt-6 inline-flex h-11 items-center gap-2 rounded-full bg-primary px-6 text-sm font-semibold text-primary-foreground shadow-lg transition duration-150 hover:opacity-90 active:bg-primary-dim">
-          <span className="text-base leading-none">⚙</span>
-          Open Dev Setup
-        </OpenDevSetupButton>
-      ) : null}
-    </div>
+    <section className="space-y-3">
+      <h2 className="text-xs uppercase tracking-[0.16em] text-muted">{title}</h2>
+      <div className="rounded-2xl border border-white/10 bg-surface-low p-8 text-center">
+        <p className="text-sm text-muted">{emptyMessage}</p>
+      </div>
+    </section>
   );
 }
 
-function SignInNotice() {
+// Full-screen sign-in card for unauthenticated visitors. The bird sits on black
+// (brand rule), per the existing LoginButton.
+function SignIn({ authError }: { authError?: string }) {
   return (
-    <Notice title="Your Blackbird account">
-      <span className="block">
-        Sign in with Blackbird to see your wallet and passport. The OAuth flow
-        runs server-side with your <Code>FLYNET_CLIENT_ID</Code> /{" "}
-        <Code>FLYNET_CLIENT_SECRET</Code> and keeps the tokens in HttpOnly cookies.
-        Setting <Code>ACCESS_TOKEN</Code> in <Code>.env.local</Code> skips the
-        flow entirely.
-      </span>
-      <span className="mt-4 block">
-        <LoginButton href="/api/auth/login" />
-      </span>
-    </Notice>
+    <main className="flex min-h-screen flex-col items-center justify-center p-6">
+      <div className="w-full max-w-sm space-y-6 rounded-3xl border border-white/10 bg-surface-low p-8 text-center">
+        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-black">
+          <BirdMark size={30} className="text-white" />
+        </span>
+        <div className="space-y-2">
+          <h1 className="text-2xl font-semibold tracking-tight">Challenge Hub</h1>
+          <p className="text-sm leading-relaxed text-muted">
+            Create diner challenges, discover market-wide events, and pay in $FLY
+            to join — all from your Blackbird account.
+          </p>
+        </div>
+        <div className="flex justify-center">
+          <LoginButton href="/api/auth/login" />
+        </div>
+        {authError ? <AuthErrorNotice error={authError} /> : null}
+      </div>
+    </main>
   );
 }
 
@@ -165,7 +120,6 @@ function AuthErrorNotice({ error }: { error: string }) {
   );
 }
 
-
 function Notice({
   title,
   tone = "info",
@@ -177,7 +131,7 @@ function Notice({
 }) {
   return (
     <div
-      className={`rounded-2xl border p-5 text-sm leading-relaxed ${
+      className={`rounded-2xl border p-5 text-left text-sm leading-relaxed ${
         tone === "error"
           ? "border-failure/40 text-failure"
           : "border-white/10 text-muted"
@@ -194,36 +148,5 @@ function Code({ children }: { children: ReactNode }) {
     <code className="rounded bg-white/10 px-1 py-0.5 text-foreground">
       {children}
     </code>
-  );
-}
-
-async function LeaderboardPreview({ apiKey }: { apiKey: string }) {
-  const { fsr } = await getLeaderboardData(apiKey);
-  const top5 = fsr.slice(0, 5);
-  return (
-    <ol className="space-y-2">
-      {top5.map(({ restaurant, checkInCount, rank }: RankedRestaurant) => {
-        const image =
-          restaurant.asset?.web_2x ??
-          restaurant.asset?.full_3x ??
-          restaurant.asset?.preview_1x ??
-          null;
-        return (
-          <li key={restaurant.id} className="flex items-center gap-3 rounded-2xl bg-surface-low p-3">
-            <span className="w-6 shrink-0 text-center text-sm font-semibold text-muted">{rank}</span>
-            {image ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={image} alt={restaurant.name} className="h-10 w-10 shrink-0 rounded-lg object-cover" />
-            ) : (
-              <div className="h-10 w-10 shrink-0 rounded-lg bg-white/10" />
-            )}
-            <p className="min-w-0 flex-1 truncate text-sm font-medium">{restaurant.name}</p>
-            <span className="shrink-0 text-sm tabular-nums text-muted">
-              {checkInCount > 0 ? checkInCount.toLocaleString() : "—"}
-            </span>
-          </li>
-        );
-      })}
-    </ol>
   );
 }

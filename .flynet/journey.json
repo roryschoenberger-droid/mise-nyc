@@ -1,0 +1,15 @@
+{
+  "updatedAt": "2026-06-24T15:34:01.276Z",
+  "steps": {
+    "grill-with-docs": {
+      "status": "not_started"
+    },
+    "to-plan": {
+      "status": "not_started"
+    },
+    "to-work": {
+      "status": "in_progress",
+      "startedAt": "2026-06-24T15:34:01.276Z"
+    }
+  }
+}
