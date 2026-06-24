@@ -206,7 +206,7 @@ export default async function Home({
           }
           emptyMessage=""
         >
-          <SuggestChallengeForm market={restaurantMarket} />
+          <SuggestChallengeForm />
         </ChallengeSection>
       ) : null}
     </main>

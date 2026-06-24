@@ -5,7 +5,7 @@ import { useState, useTransition } from "react";
 // A restaurant owner pitches a market-wide challenge for Blackbird to run in
 // their city. POSTs to /api/suggestions; Blackbird staff read submissions at
 // /admin/suggestions. Shows a thank-you state on success.
-export function SuggestChallengeForm({ market }: { market: string }) {
+export function SuggestChallengeForm() {
   const [text, setText] = useState("");
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,8 +38,7 @@ export function SuggestChallengeForm({ market }: { market: string }) {
           Sent to Blackbird — thanks for the pitch. 🙌
         </p>
         <p className="mt-1 text-sm text-muted">
-          The team reviews ideas from {market || "your market"} restaurants
-          regularly.
+          The team reviews ideas from Blackbird restaurants regularly.
         </p>
         <button
           type="button"
@@ -63,9 +62,7 @@ export function SuggestChallengeForm({ market }: { market: string }) {
         className="w-full resize-y rounded-xl border border-white/10 bg-background px-4 py-3 text-sm leading-relaxed text-foreground placeholder:text-muted focus:border-white/20 focus:outline-none"
       />
       <div className="flex items-center justify-between gap-3">
-        <span className="text-xs text-muted">
-          Goes to the Blackbird team{market ? ` for ${market}` : ""}.
-        </span>
+        <span className="text-xs text-muted">Goes to the Blackbird team.</span>
         <button
           type="button"
           onClick={handleSubmit}
